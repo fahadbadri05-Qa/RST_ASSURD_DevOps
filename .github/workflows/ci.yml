@@ -1,4 +1,4 @@
-name: API Test Pipeline
+﻿name: API Test Pipeline
 
 on:
   push:
@@ -15,6 +15,9 @@ on:
         default: 'smoke'
         type: choice
         options: [smoke, regression, all]
+
+permissions:
+  contents: write
 
 jobs:
   api-tests:
@@ -49,7 +52,7 @@ jobs:
         if: always()
         run: mvn allure:report
 
-      - name: Upload Allure report
+      - name: Upload Allure report as artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -63,3 +66,11 @@ jobs:
           name: API Test Results
           path: target/surefire-reports/*.xml
           reporter: java-junit
+
+      - name: Publish Allure report to GitHub Pages
+        if: always() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: target/site/allure-maven-plugin
+          keep_files: false
