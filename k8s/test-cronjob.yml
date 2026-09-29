@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restful-booker-regression-cron
+  namespace: qa-automation
+spec:
+  schedule: "0 2 * * *" # Runs every night at 2:00 AM UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: api-regression-tests
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: maven-test-runner
+            image: maven:3.9.6-eclipse-temurin-17
+            workingDir: /app
+            command: ["mvn", "test", "-Dgroups=regression"]
+            volumeMounts:
+            - name: source-code
+              mountPath: /app
+          volumes:
+          - name: source-code
+            emptyDir: {}
