@@ -1,6 +1,10 @@
-# Restful-Booker API Test Automation + CI/CD
+﻿# Restful-Booker API Test Automation + CI/CD
 
 A REST Assured framework testing the [Restful-Booker API](https://restful-booker.herokuapp.com/apidoc/index.html) — a public API purpose-built for testing practice (auth, full CRUD, realistic edge cases). Wired into both **Jenkins** (matching a typical enterprise Docker-agent setup) and **GitHub Actions** (for public CI on the repo itself), with Allure reporting, environment switching, and smoke/regression tagging.
+
+## Live report
+
+Latest Allure report, auto-published on every push to `main`: https://fahadbadri05-qa.github.io/RST_ASSURD_DevOps/
 
 ## Stack
 
@@ -12,29 +16,6 @@ A REST Assured framework testing the [Restful-Booker API](https://restful-booker
 - Jenkins (declarative, Docker agent) + GitHub Actions
 
 ## Project structure
-
-```
-src/main/java/com/apitest/
-  config/ConfigManager.java     -> env resolution: system property -> env var -> properties file
-  models/                       -> Booking, BookingDates, AuthRequest, AuthResponse (POJOs)
-  clients/                      -> AuthClient, BookingClient (REST Assured request layer)
-
-src/test/java/com/apitest/tests/
-  BaseTest.java                 -> shared setup, request/response logging, Allure filter
-  AuthTests.java                -> token generation (smoke)
-  GetBookingTests.java          -> read + JSON schema validation
-  CreateBookingTests.java       -> booking creation
-  UpdateBookingTests.java       -> update + auth-negative case
-  DeleteBookingTests.java       -> full create -> delete -> verify-gone lifecycle
-
-src/test/resources/
-  config.properties             -> default (qa) environment values
-  schemas/booking-schema.json   -> JSON schema for response validation
-
-Jenkinsfile                     -> declarative pipeline, env + suite as build parameters
-.github/workflows/ci.yml        -> smoke on every push/PR, full regression nightly at 2 AM UTC
-Dockerfile                      -> containerized test run
-```
 
 ## Run it locally
 
@@ -73,11 +54,14 @@ Point a Pipeline job at this repo (`Jenkinsfile` is auto-detected). It exposes `
 - **POJO request/response mapping** instead of raw JSON strings or `jsonPath()` everywhere — `AuthClient` deserializes straight into `AuthResponse`, which is the idiomatic REST Assured pattern and scales better as the API surface grows.
 - **CI cadence**: smoke on every push (fast feedback), full regression nightly via cron — the same shape as a real release pipeline, not "run everything every time."
 
+## Completed milestones
+
+1. **Parallel execution** — Enabled via `junit-platform.properties` (concurrent classes + methods). Reduced total run time from 30.05s to 28.2s (~6%). The gain is modest because the suite is network-bound (calls to a live external API) rather than CPU-bound, and a fixed JVM/Maven startup cost is unaffected by parallelism — a deliberate, measured result rather than a big round number.
+2. **Data-driven tests** — `DataDrivenBookingTests` uses `@ParameterizedTest` with `@ValueSource` (boundary invalid IDs: 0, -1, 999999999) and `@CsvSource` (varied booking payloads). Grew the suite from 10 to 17 tests without duplicating assertion logic.
+3. **Allure → GitHub Pages** — `peaceiris/actions-gh-pages` step in `ci.yml` publishes the report to a `gh-pages` branch on every push to `main`, served live via GitHub Pages (link above).
+
 ## Next milestones (stretch goals to extend this further)
 
-1. **Parallel execution** — JUnit 5 `junit-platform.properties` with `junit.jupiter.execution.parallel.enabled=true`, then measure the before/after runtime (you already have a great "reduced X to Y" story from LETITBEX — build the same evidence here).
-2. **WireMock mock layer** — stand up a Dockerized WireMock instance so the suite doesn't depend on the (sometimes slow/flaky) public Heroku instance; run contract-style tests against both.
-3. **Kubernetes CronJob** — replace/complement the Jenkins cron trigger with a K8s CronJob running the Docker image, since you've already done K8s-based parallel execution professionally.
-4. **Publish Allure to GitHub Pages** — so the report is a live link you can drop straight into your portfolio/resume, not just a downloadable artifact.
-5. **Slack/Teams webhook on failure** — wire the `failure` post-block (Jenkinsfile) or a GitHub Actions step to notify on regression breaks.
-6. **Data-driven tests** — `@ParameterizedTest` + CSV/JSON source for booking payloads (boundary prices, missing fields, invalid date formats) to bulk out negative-path coverage.
+1. **WireMock mock layer** — stand up a Dockerized WireMock instance so the suite doesn't depend on the (sometimes slow/flaky) public Heroku instance; run contract-style tests against both.
+2. **Kubernetes CronJob** — replace/complement the Jenkins cron trigger with a K8s CronJob running the Docker image, since you've already done K8s-based parallel execution professionally.
+3. **Slack/Teams webhook on failure** — wire the `failure` post-block (Jenkinsfile) or a GitHub Actions step to notify on regression breaks.
