@@ -7,3 +7,5 @@ allure-report/
 .DS_Store
 
 .allure/
+
+wiremock-standalone.jar
