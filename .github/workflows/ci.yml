@@ -1,4 +1,4 @@
-﻿name: API Test Pipeline
+name: API Test Pipeline
 
 on:
   push:
@@ -48,9 +48,41 @@ jobs:
             mvn -B test -Denv=qa -Dgroups=${{ steps.suite.outputs.suite }}
           fi
 
+      - name: Start WireMock for load test
+        id: wiremock
+        if: always()
+        run: |
+          curl -fsSL -o wiremock-standalone.jar https://repo1.maven.org/maven2/org/wiremock/wiremock-standalone/3.13.1/wiremock-standalone-3.13.1.jar
+          nohup java -jar wiremock-standalone.jar --port 8081 --root-dir wiremock > wiremock.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:8081/__admin/mappings > /dev/null; then
+              echo "WireMock is up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "WireMock did not start within 30s"
+          cat wiremock.log
+          exit 1
+
+      - name: Run Gatling load test
+        id: gatling
+        if: always() && steps.wiremock.outcome == 'success'
+        run: mvn -B gatling:test
+
       - name: Generate Allure report
         if: always()
         run: mvn allure:report
+
+      - name: Add load-test report to published site
+        if: always()
+        run: |
+          if ls -d target/gatling/*/ > /dev/null 2>&1; then
+            mkdir -p target/site/allure-maven-plugin/load-test
+            cp -r target/gatling/*/. target/site/allure-maven-plugin/load-test/
+          else
+            echo "No Gatling report found - skipping"
+          fi
 
       - name: Upload Allure report as artifact
         if: always()
@@ -80,17 +112,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: failure
-          text: "🚨 REST Assured API Pipeline Failed! Check repo: fahadbadri05-Qa/RST_ASSURD_DevOps"
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Send Slack Notification on Failure
-        if: failure()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: failure
-          text: "🚨 REST Assured API Pipeline Failed! Check repo: fahadbadri05-Qa/RST_ASSURD_DevOps"
+          text: "REST Assured API Pipeline Failed! Check repo: fahadbadri05-Qa/RST_ASSURD_DevOps"
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
