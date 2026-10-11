@@ -1,0 +1,5 @@
+{
+  "priority": 1,
+  "request": { "method": "GET", "urlPathPattern": "/booking/(0|999999999)" },
+  "response": { "status": 404, "body": "Not Found" }
+}

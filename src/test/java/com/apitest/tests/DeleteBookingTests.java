@@ -8,6 +8,7 @@ import io.qameta.allure.Epic;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 @Epic("Booking - Delete")
 public class DeleteBookingTests extends BaseTest {
@@ -21,6 +22,8 @@ public class DeleteBookingTests extends BaseTest {
 
     @Test
     @Tag("regression")
+    @DisabledIfSystemProperty(named = "env", matches = "mock",
+            disabledReason = "Needs server-side state (create, delete, then 404); stateless stubs cannot model it")
     @Description("Verify a booking can be deleted with a valid token, and is gone afterward")
     void deleteBooking_withValidToken_removesBooking() {
         Booking booking = new Booking(

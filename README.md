@@ -1,4 +1,4 @@
-﻿# Restful-Booker API Test Automation + CI/CD
+# Restful-Booker API Test Automation + CI/CD
 
 ![CI](https://github.com/fahadbadri05-Qa/RST_ASSURD_DevOps/actions/workflows/ci.yml/badge.svg)
 
@@ -17,7 +17,7 @@ REST Assured test framework for the public [Restful-Booker API](https://restful-
 | Suites | `@Tag("smoke")` (5 tests) and `@Tag("regression")` (13 tests including parameterized cases), selected with `-Dgroups=` |
 | Data-driven tests | `@ParameterizedTest` with `@ValueSource` and `@CsvSource` (7 cases from 2 methods) |
 | Parallel execution | JUnit 5 concurrent classes and methods via `junit-platform.properties` |
-| Mocking | WireMock in-JVM test (port 8089) and standalone stubs used by the load test (port 8081) |
+| Mocking | WireMock in-JVM test (port 8089); standalone stubs (port 8081) used by the load test and by `mvn test -Denv=mock` (16 functional tests; the delete lifecycle test is skipped because stateless stubs cannot model it) |
 | Load test | Gatling (Java DSL): 20 users ramped over 10 s, 4 requests each, with pass/fail assertions |
 | Reporting | Allure, published to GitHub Pages |
 | CI/CD | GitHub Actions; a declarative Jenkinsfile (Docker agent) is also provided |
@@ -53,6 +53,7 @@ mvn test -Dgroups=regression
 
 # against another environment (loads config-<env>.properties)
 mvn test -Denv=staging
+mvn test -Denv=mock   # local WireMock stubs on port 8081 (start WireMock first, see the load test steps below)
 
 # view the Allure report
 mvn allure:serve
@@ -123,6 +124,6 @@ Enabling concurrent classes and methods reduced a full run from 30.05 s to 28.2 
 
 - **Kubernetes CronJob:** the manifest in `k8s/` is a draft. It still needs a way to get the test code into the container (an init container that clones the repo, or a built image) and has not been run on a cluster.
 - **Slack failure alert:** the step exists in the workflow but needs a `SLACK_WEBHOOK_URL` repository secret before it can send anything.
-- **Functional suite against the stubs:** `-Denv=mock` needs a mock config profile and PUT and DELETE stubs.
+- **Mock profile in CI:** `-Denv=mock` runs locally but is not part of the pipeline yet. It needs its own Allure results directory so live and mock runs do not mix, and the delete lifecycle could be modelled with WireMock scenarios.
 - **Jenkins:** add a Gatling stage to the Jenkinsfile; the Jenkinsfile has not been verified against a live Jenkins yet.
 - **Docker:** the Dockerfile and `docker-compose.wiremock.yml` are not verified end to end, and the compose file predates the standalone-JAR setup.

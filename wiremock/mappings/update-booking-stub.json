@@ -1,0 +1,14 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/booking/[0-9]+",
+    "cookies": { "token": { "equalTo": "mock-token-12345" } }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "body": "{{{request.body}}}",
+    "transformers": ["response-template"]
+  }
+}

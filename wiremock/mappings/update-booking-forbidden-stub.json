@@ -1,0 +1,5 @@
+{
+  "priority": 2,
+  "request": { "method": "PUT", "urlPathPattern": "/booking/[0-9]+" },
+  "response": { "status": 403, "body": "Forbidden" }
+}

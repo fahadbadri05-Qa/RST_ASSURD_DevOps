@@ -1,26 +1,9 @@
-﻿{
-  "request": {
-    "method": "POST",
-    "url": "/booking"
-  },
+{
+  "request": { "method": "POST", "url": "/booking" },
   "response": {
     "status": 200,
-    "headers": {
-      "Content-Type": "application/json; charset=utf-8"
-    },
-    "jsonBody": {
-      "bookingid": 999,
-      "booking": {
-        "firstname": "Jim",
-        "lastname": "Brown",
-        "totalprice": 111,
-        "depositpaid": true,
-        "bookingdates": {
-          "checkin": "2026-01-01",
-          "checkout": "2026-01-02"
-        },
-        "additionalneeds": "Breakfast"
-      }
-    }
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "body": "{\"bookingid\": 999, \"booking\": {{{request.body}}} }",
+    "transformers": ["response-template"]
   }
 }
