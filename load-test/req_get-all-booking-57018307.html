@@ -71,8 +71,10 @@
             <div class="container-article">
             <div class="article">
               <div class="alert-danger">
-  You are using Gatling 3.10.3
+  
+You are using Gatling 3.10.3
  released on 2023-12-20, more than 1 year ago.
+ Gatling 3.13.5 is available since 2025-03-11.
 
   Please check the <a href="https://gatling.io/docs/gatling/reference/current/whats_new">new features</a>,
   the <a href="https://gatling.io/docs/gatling/reference/current/upgrading/">upgrade guides</a>,
@@ -331,7 +333,7 @@ var responsetimeDistributionChart = new Highcharts.Chart({
     maskInside: false
   },
   xAxis: {
-    categories: ['1', '2', '3'],
+    categories: ['1', '2', '3', '4'],
     tickInterval: 20
   },
   yAxis: {
@@ -359,7 +361,7 @@ type: 'column',
 color: '#68b65c',
 name: 'OK',
 data: [
-  10.0,70.0,20.0
+  10.0,70.0,15.0,5.0
 ],
 tooltip: { yDecimals: 0, ySuffix: 'ms' }
 },
@@ -380,7 +382,7 @@ responsetimeDistributionChart.setTitle({
   useHTML: true
 });
 
-var responsetimepercentilesovertimeokPercentiles = unpack([[1791739643,[3,3,3,3,3,3,3,3,3,3]],[1791739644,[2,2,2,2,2,2,2,2,2,2]],[1791739645,[2,2,2,2,2,2,2,2,2,2]],[1791739646,[2,2,2,2,2,2,2,2,2,2]],[1791739647,[2,2,2,2,2,2,2,2,2,2]],[1791739648,[2,2,2,2,2,2,2,2,2,3]],[1791739649,[2,2,2,2,2,2,2,2,2,3]],[1791739650,[2,2,2,2,2,2,2,2,2,2]],[1791739651,[1,1,1,1,1,1,1,1,1,2]],[1791739652,[1,1,1,1,1,1,1,1,1,2]]]);
+var responsetimepercentilesovertimeokPercentiles = unpack([[1791744478,[2,2,3,3,3,3,3,3,3,4]],[1791744479,[2,2,2,2,2,2,2,2,2,3]],[1791744480,[2,2,2,2,2,2,2,2,2,2]],[1791744481,[2,2,2,2,2,2,2,2,2,2]],[1791744482,[2,2,2,2,2,2,2,2,2,3]],[1791744483,[2,2,2,2,2,2,2,2,2,2]],[1791744484,[2,2,2,2,2,2,2,2,2,3]],[1791744485,[2,2,2,2,2,2,2,2,2,2]],[1791744486,[1,1,1,1,1,1,1,1,1,2]],[1791744487,[1,1,1,1,1,1,1,1,1,2]]]);
 
 var responsetimepercentilesovertimeokPercentilesChart = new Highcharts.StockChart({
   chart: {
@@ -577,7 +579,7 @@ responsetimepercentilesovertimeokPercentilesChart.setTitle({
   useHTML: true
 });
 
-var requests = unpack([[1791739643,[2,2,0]],[1791739644,[2,2,0]],[1791739645,[2,2,0]],[1791739646,[2,2,0]],[1791739647,[2,2,0]],[1791739648,[2,2,0]],[1791739649,[2,2,0]],[1791739650,[2,2,0]],[1791739651,[2,2,0]],[1791739652,[2,2,0]]]);
+var requests = unpack([[1791744478,[2,2,0]],[1791744479,[2,2,0]],[1791744480,[2,2,0]],[1791744481,[2,2,0]],[1791744482,[2,2,0]],[1791744483,[2,2,0]],[1791744484,[2,2,0]],[1791744485,[2,2,0]],[1791744486,[2,2,0]],[1791744487,[2,2,0]]]);
 
 var requestsChart = new Highcharts.StockChart({
   chart: {
@@ -688,7 +690,7 @@ requestsChart.setTitle({
   useHTML: true
 });
 
-var responses = unpack([[1791739643,[2,2,0]],[1791739644,[2,2,0]],[1791739645,[2,2,0]],[1791739646,[2,2,0]],[1791739647,[2,2,0]],[1791739648,[2,2,0]],[1791739649,[2,2,0]],[1791739650,[2,2,0]],[1791739651,[2,2,0]],[1791739652,[2,2,0]]]);
+var responses = unpack([[1791744478,[2,2,0]],[1791744479,[2,2,0]],[1791744480,[2,2,0]],[1791744481,[2,2,0]],[1791744482,[2,2,0]],[1791744483,[2,2,0]],[1791744484,[2,2,0]],[1791744485,[2,2,0]],[1791744486,[2,2,0]],[1791744487,[2,2,0]]]);
 
 var requestsChart = new Highcharts.StockChart({
   chart: {
