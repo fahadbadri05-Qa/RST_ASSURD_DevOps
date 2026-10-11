@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 2 * * *'   # nightly full regression at 02:00 UTC
+    - cron: '0 2 * * *'    # nightly full regression at 02:00 UTC
   workflow_dispatch:
     inputs:
       suite:
@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   api-tests:
@@ -107,12 +108,29 @@ jobs:
           publish_dir: target/site/allure-maven-plugin
           keep_files: false
 
-      - name: Send Slack Notification on Failure
-        if: failure()
-        uses: 8398a7/action-slack@v3
+  docker-publish:
+    needs: api-tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          status: failure
-          text: "REST Assured API Pipeline Failed! Check repo: fahadbadri05-Qa/RST_ASSURD_DevOps"
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}

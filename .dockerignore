@@ -1,0 +1,6 @@
+target/
+.git/
+*.jar
+allure-results/
+.idea/
+*.log
