@@ -141,4 +141,3 @@ Enabling concurrent classes and methods reduced a full run from 30.05 s to 28.2 
 - **Kubernetes schedule:** a Job created from the CronJob passed, but the 02:00 schedule firing unattended has not been observed, and the image is referenced as `:latest` (pin the commit SHA tag for reproducible runs).
 - **Mock profile in CI:** `-Denv=mock` runs locally but is not part of the pipeline yet. It needs its own Allure results directory so live and mock runs do not mix, and the delete lifecycle could be modelled with WireMock scenarios.
 - **Jenkins:** add a Gatling stage to the Jenkinsfile; the Jenkinsfile has not been verified against a live Jenkins yet.
-- **docker-compose.wiremock.yml:** predates the standalone-JAR setup and is not verified; update it to port 8081 or remove it.
