@@ -4,26 +4,28 @@ metadata:
   name: restful-booker-regression-cron
   namespace: qa-automation
 spec:
-  schedule: "0 2 * * *" # Runs every night at 2:00 AM UTC
+  schedule: "0 2 * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 1800
       template:
         metadata:
           labels:
             app: api-regression-tests
         spec:
-          restartPolicy: OnFailure
+          restartPolicy: Never
           containers:
-          - name: maven-test-runner
-            image: maven:3.9.6-eclipse-temurin-17
-            workingDir: /app
-            command: ["mvn", "test", "-Dgroups=regression"]
-            volumeMounts:
-            - name: source-code
-              mountPath: /app
-          volumes:
-          - name: source-code
-            emptyDir: {}
+          - name: api-test-runner
+            image: ghcr.io/fahadbadri05-qa/rst_assurd_devops:latest
+            imagePullPolicy: IfNotPresent
+            args: ["-Dgroups=regression"]
+            resources:
+              requests:
+                cpu: "250m"
+                memory: "512Mi"
+              limits:
+                memory: "2Gi"

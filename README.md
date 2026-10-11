@@ -21,7 +21,7 @@ REST Assured test framework for the public [Restful-Booker API](https://restful-
 | Load test | Gatling (Java DSL): 20 users ramped over 10 s, 4 requests each, with pass/fail assertions |
 | Reporting | Allure, published to GitHub Pages |
 | CI/CD | GitHub Actions; a declarative Jenkinsfile (Docker agent) is also provided |
-| Packaging | Dockerfile for running the suite in a container |
+| Packaging | Dockerfile; CI publishes the image to GitHub Container Registry |
 
 ## CI/CD pipeline (GitHub Actions)
 
@@ -104,7 +104,23 @@ wiremock/mappings/                stubs for auth, create booking, get all, get b
 .github/workflows/ci.yml          GitHub Actions pipeline
 Jenkinsfile                       declarative pipeline with ENVIRONMENT and TEST_SUITE parameters
 Dockerfile                        container for running the suite
-k8s/test-cronjob.yml              draft CronJob manifest (see roadmap)
+k8s/test-cronjob.yml              CronJob that runs the regression suite from the published image
+```
+
+## Docker and Kubernetes
+
+- **Image:** every push to `main` builds the image in CI and publishes it to GitHub Container Registry as `ghcr.io/fahadbadri05-qa/rst_assurd_devops`, tagged `latest` and with the commit SHA. The job only runs after the API tests pass.
+- **Run it:** the image entrypoint is `mvn test`, so arguments are Maven options: `docker run --rm ghcr.io/fahadbadri05-qa/rst_assurd_devops:latest -Dgroups=smoke`
+- **CronJob:** `k8s/test-cronjob.yml` runs the regression suite at 02:00 UTC in the `qa-automation` namespace, with `restartPolicy: Never`, no retries (a failing test is a result, not a transient error), a 30 minute deadline and resource limits.
+- **Verified:** a Job created from the CronJob ran the 13 regression tests to BUILD SUCCESS on Docker Desktop Kubernetes, using the image published by CI.
+- **Not verified:** the 02:00 schedule firing unattended, and any cluster other than Docker Desktop.
+- **Build note:** the workflow sets up Docker Buildx before building. Without it the image was published as a single manifest, and on Docker Desktop (containerd image store) Kubernetes failed to read it with `ImageInspectError`. Adding Buildx fixed it; the underlying cause was not established.
+
+```bash
+kubectl create namespace qa-automation
+kubectl apply -f k8s/test-cronjob.yml
+kubectl create job --from=cronjob/restful-booker-regression-cron manual-1 -n qa-automation
+kubectl logs job/manual-1 -n qa-automation
 ```
 
 ## Design decisions
@@ -122,8 +138,7 @@ Enabling concurrent classes and methods reduced a full run from 30.05 s to 28.2 
 
 ## Roadmap (not done yet)
 
-- **Kubernetes CronJob:** the manifest in `k8s/` is a draft. It still needs a way to get the test code into the container (an init container that clones the repo, or a built image) and has not been run on a cluster.
-- **Slack failure alert:** the step exists in the workflow but needs a `SLACK_WEBHOOK_URL` repository secret before it can send anything.
+- **Kubernetes schedule:** a Job created from the CronJob passed, but the 02:00 schedule firing unattended has not been observed, and the image is referenced as `:latest` (pin the commit SHA tag for reproducible runs).
 - **Mock profile in CI:** `-Denv=mock` runs locally but is not part of the pipeline yet. It needs its own Allure results directory so live and mock runs do not mix, and the delete lifecycle could be modelled with WireMock scenarios.
 - **Jenkins:** add a Gatling stage to the Jenkinsfile; the Jenkinsfile has not been verified against a live Jenkins yet.
-- **Docker:** the Dockerfile and `docker-compose.wiremock.yml` are not verified end to end, and the compose file predates the standalone-JAR setup.
+- **docker-compose.wiremock.yml:** predates the standalone-JAR setup and is not verified; update it to port 8081 or remove it.
