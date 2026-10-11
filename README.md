@@ -1,67 +1,128 @@
 ﻿# Restful-Booker API Test Automation + CI/CD
 
-A REST Assured framework testing the [Restful-Booker API](https://restful-booker.herokuapp.com/apidoc/index.html) — a public API purpose-built for testing practice (auth, full CRUD, realistic edge cases). Wired into both **Jenkins** (matching a typical enterprise Docker-agent setup) and **GitHub Actions** (for public CI on the repo itself), with Allure reporting, environment switching, and smoke/regression tagging.
+![CI](https://github.com/fahadbadri05-Qa/RST_ASSURD_DevOps/actions/workflows/ci.yml/badge.svg)
 
-## Live report
+REST Assured test framework for the public [Restful-Booker API](https://restful-booker.herokuapp.com/apidoc/index.html) (auth plus full CRUD), with a GitHub Actions pipeline, Allure reporting, parallel execution, data-driven tests, WireMock stubs and a Gatling load test.
 
-Latest Allure report, auto-published on every push to `main`: https://fahadbadri05-qa.github.io/RST_ASSURD_DevOps/
+**Live reports, published from CI on every push to `main`:**
 
-## Stack
+- Functional test report (Allure): https://fahadbadri05-qa.github.io/RST_ASSURD_DevOps/
+- Load test report (Gatling): https://fahadbadri05-qa.github.io/RST_ASSURD_DevOps/load-test/
 
-- Java 17, Maven
-- REST Assured 5 + JSON Schema Validator
-- JUnit 5 (with `@Tag` for smoke/regression suites)
-- Allure Report
-- Docker
-- Jenkins (declarative, Docker agent) + GitHub Actions
+## What is in here
 
-## Project structure
+| Area | Details |
+|---|---|
+| Functional API tests | 18 tests (JUnit 5 + REST Assured 5): auth, create, read, update, delete, JSON schema validation |
+| Suites | `@Tag("smoke")` (5 tests) and `@Tag("regression")` (13 tests including parameterized cases), selected with `-Dgroups=` |
+| Data-driven tests | `@ParameterizedTest` with `@ValueSource` and `@CsvSource` (7 cases from 2 methods) |
+| Parallel execution | JUnit 5 concurrent classes and methods via `junit-platform.properties` |
+| Mocking | WireMock in-JVM test (port 8089) and standalone stubs used by the load test (port 8081) |
+| Load test | Gatling (Java DSL): 20 users ramped over 10 s, 4 requests each, with pass/fail assertions |
+| Reporting | Allure, published to GitHub Pages |
+| CI/CD | GitHub Actions; a declarative Jenkinsfile (Docker agent) is also provided |
+| Packaging | Dockerfile for running the suite in a container |
+
+## CI/CD pipeline (GitHub Actions)
+
+| Trigger | What runs |
+|---|---|
+| push or pull request to `main` | smoke suite |
+| nightly at 02:00 UTC | full suite |
+| manual (`workflow_dispatch`) | smoke, regression or all, selectable |
+
+Every run then starts a standalone WireMock, runs the Gatling load test (the build fails if any request fails or the max response time exceeds 1000 ms), generates the Allure report, adds the Gatling report under `/load-test/`, and publishes both to GitHub Pages (main branch only).
+
+## Load test
+
+- Scenario: auth -> create booking -> get booking by id -> get all bookings.
+- Load: 20 virtual users ramped over 10 seconds (80 requests in total).
+- Assertions: zero failed requests, and max response time under 1000 ms.
+- Target: local WireMock stubs, **not** the live Restful-Booker service. The live site is a shared free demo server and should not be load tested. The results therefore validate the load-test setup and the pipeline, not the performance of the real API.
+- Example CI run: 80/80 requests OK, p95 6 ms, p99 17 ms, max 46 ms.
 
 ## Run it locally
 
 ```bash
-# everything
+# all functional tests
 mvn test
 
-# just smoke tests
+# only smoke / only regression
 mvn test -Dgroups=smoke
-
-# just regression
 mvn test -Dgroups=regression
 
-# against a different environment (add config-staging.properties etc. to extend)
+# against another environment (loads config-<env>.properties)
 mvn test -Denv=staging
 
-# view the report
+# view the Allure report
 mvn allure:serve
 ```
 
-## Run it in Docker
+Load test (needs Java 17 and Maven). Terminal 1 starts WireMock:
 
 ```bash
-docker build -t booker-api-tests .
-docker run --rm booker-api-tests
+curl -L -o wiremock-standalone.jar https://repo1.maven.org/maven2/org/wiremock/wiremock-standalone/3.13.1/wiremock-standalone-3.13.1.jar
+java -jar wiremock-standalone.jar --port 8081 --root-dir wiremock
 ```
 
-## Run it in Jenkins
+On Windows PowerShell, download with `Invoke-WebRequest -Uri <same url> -OutFile wiremock-standalone.jar`.
 
-Point a Pipeline job at this repo (`Jenkinsfile` is auto-detected). It exposes `ENVIRONMENT` and `TEST_SUITE` as build parameters, so you can trigger `staging` + `regression` from the Jenkins UI without touching code. Needs the Allure Jenkins plugin installed to render the `post { always { allure ... } }` step; drop that block if you don't have it configured.
+Terminal 2 runs the test and prints the report location when done:
 
-## Design choices worth knowing for an interview
+```bash
+mvn gatling:test
+```
 
-- **Env resolution order** (`ConfigManager`): system property `-Denv=` → env var override (e.g. `API_BASE_URL`, useful for injecting secrets in CI without committing them) → properties file. This is the same layered pattern you'd use to avoid hardcoding URLs/creds across qa/staging/prod.
-- **Tag-based suites, not separate test classes**: `@Tag("smoke")` / `@Tag("regression")` on individual `@Test` methods, filtered via `-Dgroups=`. Keeps smoke tests as a true subset of regression instead of duplicated code — mirrors the smoke/regression split from your ServiceNow ATF work.
-- **POJO request/response mapping** instead of raw JSON strings or `jsonPath()` everywhere — `AuthClient` deserializes straight into `AuthResponse`, which is the idiomatic REST Assured pattern and scales better as the API surface grows.
-- **CI cadence**: smoke on every push (fast feedback), full regression nightly via cron — the same shape as a real release pipeline, not "run everything every time."
+## Project structure
 
-## Completed milestones
+```
+src/main/java/com/apitest/
+  config/ConfigManager.java       env resolution: system property -> env var -> properties file
+  models/                         Booking, BookingDates, AuthRequest, AuthResponse (POJOs)
+  clients/                        AuthClient, BookingClient (REST Assured request layer)
 
-1. **Parallel execution** — Enabled via `junit-platform.properties` (concurrent classes + methods). Reduced total run time from 30.05s to 28.2s (~6%). The gain is modest because the suite is network-bound (calls to a live external API) rather than CPU-bound, and a fixed JVM/Maven startup cost is unaffected by parallelism — a deliberate, measured result rather than a big round number.
-2. **Data-driven tests** — `DataDrivenBookingTests` uses `@ParameterizedTest` with `@ValueSource` (boundary invalid IDs: 0, -1, 999999999) and `@CsvSource` (varied booking payloads). Grew the suite from 10 to 17 tests without duplicating assertion logic.
-3. **Allure → GitHub Pages** — `peaceiris/actions-gh-pages` step in `ci.yml` publishes the report to a `gh-pages` branch on every push to `main`, served live via GitHub Pages (link above).
+src/test/java/com/apitest/tests/
+  BaseTest.java                   shared setup, request/response logging, Allure filter
+  AuthTests.java                  token generation
+  GetBookingTests.java            read + JSON schema validation
+  CreateBookingTests.java         booking creation
+  UpdateBookingTests.java         update + missing-token case
+  DeleteBookingTests.java         create -> delete -> verify gone
+  DataDrivenBookingTests.java     parameterized boundary IDs and booking payloads
+  WireMockBookingTests.java       in-JVM WireMock test
 
-## Next milestones (stretch goals to extend this further)
+src/test/java/simulations/
+  BookingLoadSimulation.java      Gatling load test
 
-1. **WireMock mock layer** — stand up a Dockerized WireMock instance so the suite doesn't depend on the (sometimes slow/flaky) public Heroku instance; run contract-style tests against both.
-2. **Kubernetes CronJob** — replace/complement the Jenkins cron trigger with a K8s CronJob running the Docker image, since you've already done K8s-based parallel execution professionally.
-3. **Slack/Teams webhook on failure** — wire the `failure` post-block (Jenkinsfile) or a GitHub Actions step to notify on regression breaks.
+src/test/resources/
+  config.properties               default environment values
+  junit-platform.properties       parallel execution settings
+  schemas/booking-schema.json     JSON schema for response validation
+
+wiremock/mappings/                stubs for auth, create booking, get all, get by id
+.github/workflows/ci.yml          GitHub Actions pipeline
+Jenkinsfile                       declarative pipeline with ENVIRONMENT and TEST_SUITE parameters
+Dockerfile                        container for running the suite
+k8s/test-cronjob.yml              draft CronJob manifest (see roadmap)
+```
+
+## Design decisions
+
+- **Layered configuration.** `ConfigManager` resolves values from the `-Denv=` system property, then environment variables (for example `API_BASE_URL`, so CI can inject values without committing them), then properties files.
+- **Tags instead of separate suites.** Smoke tests are a tagged subset of the same classes, filtered with `-Dgroups=`, so nothing is duplicated.
+- **Request layer separated from tests.** Tests call `BookingClient` and `AuthClient` and work with POJOs, so an API change is fixed in one place.
+- **Schema validation.** Responses are checked against a JSON schema, not just individual fields.
+- **Load test targets stubs.** A shared public demo API should not receive load, and a local stub gives repeatable numbers.
+- **CI cadence.** Fast smoke feedback on every push, full regression nightly.
+
+## Measured result: parallel execution
+
+Enabling concurrent classes and methods reduced a full run from 30.05 s to 28.2 s (about 6 percent). The gain is small because the suite is network-bound (calls to an external API) and a fixed JVM and Maven startup cost is unaffected by parallelism.
+
+## Roadmap (not done yet)
+
+- **Kubernetes CronJob:** the manifest in `k8s/` is a draft. It still needs a way to get the test code into the container (an init container that clones the repo, or a built image) and has not been run on a cluster.
+- **Slack failure alert:** the step exists in the workflow but needs a `SLACK_WEBHOOK_URL` repository secret before it can send anything.
+- **Functional suite against the stubs:** `-Denv=mock` needs a mock config profile and PUT and DELETE stubs.
+- **Jenkins:** add a Gatling stage to the Jenkinsfile; the Jenkinsfile has not been verified against a live Jenkins yet.
+- **Docker:** the Dockerfile and `docker-compose.wiremock.yml` are not verified end to end, and the compose file predates the standalone-JAR setup.
