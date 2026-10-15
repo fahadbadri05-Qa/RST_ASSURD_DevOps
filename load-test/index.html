@@ -71,10 +71,8 @@
             <div class="container-article">
             <div class="article">
               <div class="alert-danger">
-  
-You are using Gatling 3.10.3
+  You are using Gatling 3.10.3
  released on 2023-12-20, more than 1 year ago.
- Gatling 3.13.5 is available since 2025-03-11.
 
   Please check the <a href="https://gatling.io/docs/gatling/reference/current/whats_new">new features</a>,
   the <a href="https://gatling.io/docs/gatling/reference/current/upgrading/">upgrade guides</a>,
@@ -106,7 +104,7 @@ You are using Gatling 3.10.3
     <div class="simulation-information-container">
       <span class="simulation-information-item">
         <span class="simulation-information-label">Date: </span>
-        <span>2026-10-14 02:21:14 GMT</span>
+        <span>2026-10-15 02:23:01 GMT</span>
       </span>
       <span class="simulation-information-item">
         <span class="simulation-information-label">Duration: </span>
@@ -618,7 +616,7 @@ var allUsersChart = new Highcharts.StockChart({
 color: '#5E7BE2',
 name: 'Booking API Load Test',
 data: [
-  [1791944474000,3],[1791944475000,3],[1791944476000,2],[1791944477000,2],[1791944478000,2],[1791944479000,2],[1791944480000,2],[1791944481000,2],[1791944482000,3],[1791944483000,1]
+  [1792030981000,3],[1792030982000,2],[1792030983000,2],[1792030984000,2],[1792030985000,2],[1792030986000,2],[1792030987000,2],[1792030988000,2],[1792030989000,2],[1792030990000,1]
 ],
 tooltip: { yDecimals: 0, ySuffix: '', valueDecimals: 0 }},
 
@@ -654,7 +652,7 @@ var responsetimeDistributionChart = new Highcharts.Chart({
     maskInside: false
   },
   xAxis: {
-    categories: ['1', '2', '3', '4', '5', '6', '10', '32', '45'],
+    categories: ['1', '2', '3', '4', '5', '6', '8', '11', '38', '66'],
     tickInterval: 20
   },
   yAxis: {
@@ -682,7 +680,7 @@ type: 'column',
 color: '#68b65c',
 name: 'OK',
 data: [
-  16.25,45.0,18.75,10.0,3.75,2.5,1.25,1.25,1.25
+  3.75,46.25,21.25,15.0,5.0,2.5,1.25,2.5,1.25,1.25
 ],
 tooltip: { yDecimals: 0, ySuffix: 'ms' }
 },
@@ -703,7 +701,7 @@ responsetimeDistributionChart.setTitle({
   useHTML: true
 });
 
-var responsetimepercentilesovertimeokPercentiles = unpack([[1791944474,[2,2,3,12,21,30,35,40,44,45]],[1791944475,[2,2,2,3,4,4,6,8,9,10]],[1791944476,[2,2,2,2,3,4,5,5,5,6]],[1791944477,[2,2,2,3,3,3,4,4,4,4]],[1791944478,[1,2,2,2,3,3,4,4,4,4]],[1791944479,[1,2,2,2,2,2,3,4,4,5]],[1791944480,[1,1,2,3,3,3,3,3,3,4]],[1791944481,[1,1,2,3,3,3,3,3,3,4]],[1791944482,[1,1,2,3,3,3,3,3,3,4]],[1791944483,[1,1,1,2,2,2,3,3,3,3]]]);
+var responsetimepercentilesovertimeokPercentiles = unpack([[1792030981,[3,3,3,15,26,36,46,56,64,66]],[1792030982,[2,2,2,5,8,10,11,11,11,11]],[1792030983,[2,2,2,3,4,5,6,6,6,6]],[1792030984,[2,2,3,3,3,3,4,4,4,5]],[1792030985,[1,2,2,3,3,3,4,4,4,5]],[1792030986,[1,2,2,3,3,3,4,4,4,4]],[1792030987,[2,2,2,3,3,3,4,4,4,5]],[1792030988,[2,2,2,3,3,3,4,4,4,4]],[1792030989,[2,2,2,2,3,3,4,4,4,4]],[1792030990,[1,2,2,2,3,3,4,4,4,5]]]);
 
 var responsetimepercentilesovertimeokPercentilesChart = new Highcharts.StockChart({
   chart: {
@@ -900,7 +898,7 @@ responsetimepercentilesovertimeokPercentilesChart.setTitle({
   useHTML: true
 });
 
-var requests = unpack([[1791944474,[8,8,0]],[1791944475,[8,8,0]],[1791944476,[8,8,0]],[1791944477,[8,8,0]],[1791944478,[8,8,0]],[1791944479,[8,8,0]],[1791944480,[8,8,0]],[1791944481,[8,8,0]],[1791944482,[8,8,0]],[1791944483,[8,8,0]]]);
+var requests = unpack([[1792030981,[8,8,0]],[1792030982,[8,8,0]],[1792030983,[8,8,0]],[1792030984,[8,8,0]],[1792030985,[8,8,0]],[1792030986,[8,8,0]],[1792030987,[8,8,0]],[1792030988,[8,8,0]],[1792030989,[8,8,0]],[1792030990,[8,8,0]]]);
 
 var requestsChart = new Highcharts.StockChart({
   chart: {
@@ -1011,7 +1009,7 @@ requestsChart.setTitle({
   useHTML: true
 });
 
-var responses = unpack([[1791944474,[8,8,0]],[1791944475,[8,8,0]],[1791944476,[8,8,0]],[1791944477,[8,8,0]],[1791944478,[8,8,0]],[1791944479,[8,8,0]],[1791944480,[8,8,0]],[1791944481,[8,8,0]],[1791944482,[8,8,0]],[1791944483,[8,8,0]]]);
+var responses = unpack([[1792030981,[8,8,0]],[1792030982,[8,8,0]],[1792030983,[8,8,0]],[1792030984,[8,8,0]],[1792030985,[8,8,0]],[1792030986,[8,8,0]],[1792030987,[8,8,0]],[1792030988,[8,8,0]],[1792030989,[8,8,0]],[1792030990,[8,8,0]]]);
 
 var requestsChart = new Highcharts.StockChart({
   chart: {
