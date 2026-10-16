@@ -71,8 +71,10 @@
             <div class="container-article">
             <div class="article">
               <div class="alert-danger">
-  You are using Gatling 3.10.3
+  
+You are using Gatling 3.10.3
  released on 2023-12-20, more than 1 year ago.
+ Gatling 3.13.5 is available since 2025-03-11.
 
   Please check the <a href="https://gatling.io/docs/gatling/reference/current/whats_new">new features</a>,
   the <a href="https://gatling.io/docs/gatling/reference/current/upgrading/">upgrade guides</a>,
@@ -331,7 +333,7 @@ var responsetimeDistributionChart = new Highcharts.Chart({
     maskInside: false
   },
   xAxis: {
-    categories: ['4', '5', '6', '8', '11', '38'],
+    categories: ['3', '4', '5', '6', '7', '9', '28'],
     tickInterval: 20
   },
   yAxis: {
@@ -359,7 +361,7 @@ type: 'column',
 color: '#68b65c',
 name: 'OK',
 data: [
-  50.0,20.0,10.0,5.0,10.0,5.0
+  15.0,40.0,15.0,10.0,10.0,5.0,5.0
 ],
 tooltip: { yDecimals: 0, ySuffix: 'ms' }
 },
@@ -380,7 +382,7 @@ responsetimeDistributionChart.setTitle({
   useHTML: true
 });
 
-var responsetimepercentilesovertimeokPercentiles = unpack([[1792030981,[8,15,23,30,32,33,35,36,37,38]],[1792030982,[11,11,11,11,11,11,11,11,11,11]],[1792030983,[6,6,6,6,6,6,6,6,6,6]],[1792030984,[4,4,4,4,4,4,4,4,4,5]],[1792030985,[4,4,4,4,4,4,4,4,4,5]],[1792030986,[4,4,4,4,4,4,4,4,4,4]],[1792030987,[4,4,4,4,4,4,4,4,4,5]],[1792030988,[4,4,4,4,4,4,4,4,4,4]],[1792030989,[4,4,4,4,4,4,4,4,4,4]],[1792030990,[4,4,4,4,4,4,4,4,4,5]]]);
+var responsetimepercentilesovertimeokPercentiles = unpack([[1792117401,[7,12,17,22,23,24,25,26,27,28]],[1792117402,[7,7,8,8,8,8,8,8,8,9]],[1792117403,[5,5,5,5,5,5,5,5,5,6]],[1792117404,[4,4,4,4,4,4,4,4,4,5]],[1792117405,[4,4,4,4,4,4,4,4,4,4]],[1792117406,[4,4,4,4,4,4,4,4,4,5]],[1792117407,[4,4,4,4,4,4,4,4,4,4]],[1792117408,[4,4,5,5,5,5,5,5,5,6]],[1792117409,[3,3,3,3,3,3,3,3,3,3]],[1792117410,[3,3,3,3,3,3,3,3,3,4]]]);
 
 var responsetimepercentilesovertimeokPercentilesChart = new Highcharts.StockChart({
   chart: {
@@ -577,7 +579,7 @@ responsetimepercentilesovertimeokPercentilesChart.setTitle({
   useHTML: true
 });
 
-var requests = unpack([[1792030981,[2,2,0]],[1792030982,[2,2,0]],[1792030983,[2,2,0]],[1792030984,[2,2,0]],[1792030985,[2,2,0]],[1792030986,[2,2,0]],[1792030987,[2,2,0]],[1792030988,[2,2,0]],[1792030989,[2,2,0]],[1792030990,[2,2,0]]]);
+var requests = unpack([[1792117401,[2,2,0]],[1792117402,[2,2,0]],[1792117403,[2,2,0]],[1792117404,[2,2,0]],[1792117405,[2,2,0]],[1792117406,[2,2,0]],[1792117407,[2,2,0]],[1792117408,[2,2,0]],[1792117409,[2,2,0]],[1792117410,[2,2,0]]]);
 
 var requestsChart = new Highcharts.StockChart({
   chart: {
@@ -688,7 +690,7 @@ requestsChart.setTitle({
   useHTML: true
 });
 
-var responses = unpack([[1792030981,[2,2,0]],[1792030982,[2,2,0]],[1792030983,[2,2,0]],[1792030984,[2,2,0]],[1792030985,[2,2,0]],[1792030986,[2,2,0]],[1792030987,[2,2,0]],[1792030988,[2,2,0]],[1792030989,[2,2,0]],[1792030990,[2,2,0]]]);
+var responses = unpack([[1792117401,[2,2,0]],[1792117402,[2,2,0]],[1792117403,[2,2,0]],[1792117404,[2,2,0]],[1792117405,[2,2,0]],[1792117406,[2,2,0]],[1792117407,[2,2,0]],[1792117408,[2,2,0]],[1792117409,[2,2,0]],[1792117410,[2,2,0]]]);
 
 var requestsChart = new Highcharts.StockChart({
   chart: {
@@ -886,7 +888,7 @@ type: 'scatter',
 color: '#68b65c',
 name: 'OK',
 data: [
-[8,36],[8,11],[8,6],[8,4],[8,4],[8,4],[8,4],[8,4],[8,4],[8,4]
+[8,26],[8,8],[8,5],[8,4],[8,4],[8,4],[8,4],[8,5],[8,3],[8,3]
 ]},
 	  {
 type: 'scatter',
