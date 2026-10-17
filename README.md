@@ -113,7 +113,8 @@ k8s/test-cronjob.yml              CronJob that runs the regression suite from th
 - **Run it:** the image entrypoint is `mvn test`, so arguments are Maven options: `docker run --rm ghcr.io/fahadbadri05-qa/rst_assurd_devops:latest -Dgroups=smoke`
 - **CronJob:** `k8s/test-cronjob.yml` runs the regression suite at 02:00 UTC in the `qa-automation` namespace, with `restartPolicy: Never`, no retries (a failing test is a result, not a transient error), a 30 minute deadline and resource limits.
 - **Verified:** a Job created from the CronJob ran the 13 regression tests to BUILD SUCCESS on Docker Desktop Kubernetes, using the image published by CI.
-- **Not verified:** the 02:00 schedule firing unattended, and any cluster other than Docker Desktop.
+- **Scheduled runs:** the cluster created Jobs on the 02:00 UTC schedule without intervention. Of the four scheduled Jobs still listed, three completed in under a minute each and one ended in Error; its logs were already gone, so the cause is unknown.
+- **Limitation:** the cluster is Docker Desktop on a laptop, so it only runs schedules while the machine and Docker Desktop are on. It complements the nightly GitHub Actions run and does not replace it. Any cluster other than Docker Desktop is untested.
 - **Build note:** the workflow sets up Docker Buildx before building. Without it the image was published as a single manifest, and on Docker Desktop (containerd image store) Kubernetes failed to read it with `ImageInspectError`. Adding Buildx fixed it; the underlying cause was not established.
 
 ```bash
@@ -138,6 +139,6 @@ Enabling concurrent classes and methods reduced a full run from 30.05 s to 28.2 
 
 ## Roadmap (not done yet)
 
-- **Kubernetes schedule:** a Job created from the CronJob passed, but the 02:00 schedule firing unattended has not been observed, and the image is referenced as `:latest` (pin the commit SHA tag for reproducible runs).
+- **Kubernetes:** the image is referenced as `:latest`; pin the commit SHA tag for reproducible runs, and keep Job logs somewhere persistent so a failed run can be diagnosed.
 - **Mock profile in CI:** `-Denv=mock` runs locally but is not part of the pipeline yet. It needs its own Allure results directory so live and mock runs do not mix, and the delete lifecycle could be modelled with WireMock scenarios.
 - **Jenkins:** add a Gatling stage to the Jenkinsfile; the Jenkinsfile has not been verified against a live Jenkins yet.
