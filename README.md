@@ -142,3 +142,7 @@ Enabling concurrent classes and methods reduced a full run from 30.05 s to 28.2 
 - **Kubernetes:** the image is referenced as `:latest`; pin the commit SHA tag for reproducible runs, and keep Job logs somewhere persistent so a failed run can be diagnosed.
 - **Mock profile in CI:** `-Denv=mock` runs locally but is not part of the pipeline yet. It needs its own Allure results directory so live and mock runs do not mix, and the delete lifecycle could be modelled with WireMock scenarios.
 - **Jenkins:** add a Gatling stage to the Jenkinsfile; the Jenkinsfile has not been verified against a live Jenkins yet.
+
+## 🔒 Enterprise Supply Chain Security & DevSecOps
+- **Keyless Container Signing (Sigstore/Cosign):** Automatically signs test container images post-build in GitHub Actions using ephemeral certificates and GitHub's OIDC issuer (id-token: write).
+- **Admission Control Policy Enforcement (Kyverno):** Enforces a strict Kubernetes ClusterPolicy in Enforce mode, cryptographically validating image signatures against the Rekor transparency log before allowing test pods or CronJobs to spin up.
