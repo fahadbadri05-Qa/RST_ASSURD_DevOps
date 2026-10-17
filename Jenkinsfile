@@ -1,10 +1,14 @@
-pipeline {
-    agent {
-        docker {
-            image 'maven:3.9-eclipse-temurin-17'
-            args '-v $HOME/.m2:/root/.m2'
-        }
+// Runs on any agent with Java 17+ and Maven on PATH (Windows or Linux).
+def runCmd(String cmd) {
+    if (isUnix()) {
+        sh cmd
+    } else {
+        bat cmd
     }
+}
+
+pipeline {
+    agent any
 
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['qa', 'staging', 'prod'], description: 'Target environment (loads config-<env>.properties)')
@@ -22,14 +26,16 @@ pipeline {
             steps {
                 script {
                     def tagFilter = params.TEST_SUITE == 'all' ? '' : "-Dgroups=${params.TEST_SUITE}"
-                    sh "mvn -B test -Denv=${params.ENVIRONMENT} ${tagFilter}"
+                    runCmd("mvn -B test -Denv=${params.ENVIRONMENT} ${tagFilter}")
                 }
             }
         }
 
         stage('Generate Allure Report') {
             steps {
-                sh 'mvn allure:report'
+                script {
+                    runCmd('mvn -B allure:report')
+                }
             }
         }
     }
@@ -37,13 +43,10 @@ pipeline {
     post {
         always {
             junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
-            // Requires the Allure Jenkins plugin installed on the controller
-            allure includeProperties: false, jdk: '', results: [[path: 'target/allure-results']]
+            archiveArtifacts artifacts: 'target/site/allure-maven-plugin/**', allowEmptyArchive: true
         }
         failure {
-            echo "Build failed on ${params.ENVIRONMENT} (${params.TEST_SUITE} suite) - check the Allure report."
-            // Hook a notifier here to match your existing setup, e.g.:
-            // slackSend(channel: '#qa-alerts', color: 'danger', message: "API tests failed: ${env.BUILD_URL}")
+            echo "Build failed on ${params.ENVIRONMENT} (${params.TEST_SUITE} suite) - see the console log and the archived Allure report."
         }
     }
 }
