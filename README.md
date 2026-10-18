@@ -20,7 +20,7 @@ REST Assured test framework for the public [Restful-Booker API](https://restful-
 | Mocking | WireMock in-JVM test (port 8089); standalone stubs (port 8081) used by the load test and by `mvn test -Denv=mock` (16 functional tests; the delete lifecycle test is skipped because stateless stubs cannot model it) |
 | Load test | Gatling (Java DSL): 20 users ramped over 10 s, 4 requests each, with pass/fail assertions |
 | Reporting | Allure, published to GitHub Pages |
-| CI/CD | GitHub Actions; a declarative Jenkinsfile (Docker agent) is also provided |
+| CI/CD | GitHub Actions; a declarative Jenkinsfile (any agent with Java and Maven) is also provided |
 | Packaging | Dockerfile; CI publishes the image to GitHub Container Registry |
 
 ## CI/CD pipeline (GitHub Actions)
@@ -105,6 +105,7 @@ wiremock/mappings/                stubs for auth, create booking, get all, get b
 Jenkinsfile                       declarative pipeline with ENVIRONMENT and TEST_SUITE parameters
 Dockerfile                        container for running the suite
 k8s/test-cronjob.yml              CronJob that runs the regression suite from the published image
+k8s/kyverno-policy.yml            ClusterPolicy: require a Cosign signature from this workflow
 ```
 
 ## Docker and Kubernetes
@@ -143,6 +144,7 @@ Enabling concurrent classes and methods reduced a full run from 30.05 s to 28.2 
 - **Mock profile in CI:** `-Denv=mock` runs locally but is not part of the pipeline yet. It needs its own Allure results directory so live and mock runs do not mix, and the delete lifecycle could be modelled with WireMock scenarios.
 - **Jenkins:** add a Gatling stage to the Jenkinsfile; the Jenkinsfile has not been verified against a live Jenkins yet.
 
-## 🔒 Enterprise Supply Chain Security & DevSecOps
+## Supply chain security (Sigstore and Kyverno)
 - **Keyless Container Signing (Sigstore/Cosign):** Automatically signs test container images post-build in GitHub Actions using ephemeral certificates and GitHub's OIDC issuer (id-token: write).
-- **Admission Control Policy Enforcement (Kyverno):** Enforces a strict Kubernetes ClusterPolicy in Enforce mode, cryptographically validating image signatures against the Rekor transparency log before allowing test pods or CronJobs to spin up.
+- **Admission Control Policy Enforcement (Kyverno):** `k8s/kyverno-policy.yml` is a ClusterPolicy in Enforce mode that requires images matching `ghcr.io/fahadbadri05-qa/rst_assurd_devops*` to carry a keyless Cosign signature from this repository workflow (`ci.yml` on `main`). It was applied to the Docker Desktop cluster and reported Ready. Blocking of an unsigned image has not been demonstrated yet.
+- **Limitation:** verification is expected to fail closed. If the registry or the Rekor log is unreachable, or Kyverno is down, the CronJob cannot start.

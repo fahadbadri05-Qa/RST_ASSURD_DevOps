@@ -1,0 +1,27 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-test-image-signature
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: verify-ghcr-signature
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+              - Job
+              - CronJob
+      verifyImages:
+        - imageReferences:
+          - "ghcr.io/fahadbadri05-qa/rst_assurd_devops*"
+          attestors:
+          - count: 1
+            entries:
+            - keyless:
+                issuer: "https://token.actions.githubusercontent.com"
+                subject: "https://github.com/fahadbadri05-Qa/RST_ASSURD_DevOps/.github/workflows/ci.yml@refs/heads/main"
+                rekor:
+                  url: "https://rekor.sigstore.dev"
